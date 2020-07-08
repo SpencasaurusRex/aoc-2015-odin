@@ -51,6 +51,10 @@ read_user_input :: proc(data: []byte, length: int) -> bool
 
 day_one :: proc(input : string)
 {
+    pt2 :: true;
+    position := 1;
+    reached_basement := false;
+
     floor : int;
     for c in input 
     {
@@ -59,6 +63,16 @@ day_one :: proc(input : string)
         if c == ')' do floor = floor - 1;
         else
         do fmt.println("Invalid character: ", c);
+
+        if pt2 && !reached_basement
+        {
+            if floor < 0 
+            {
+                fmt.println("Reached basement at position: ", position);
+                reached_basement = true;
+            }
+            position = position + 1;
+        }
     }
 
     fmt.println("Final floor: ", floor);
