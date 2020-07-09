@@ -92,7 +92,8 @@ day_two :: proc(input : string)
     
     // Array of l,w,h, l,w,h, ...
     box_sizes := make([dynamic]int);
-    
+    defer delete(box_sizes);
+
     // Parse individual numbers via slicing
     num_start_index := 0;
     char_index := 0;
