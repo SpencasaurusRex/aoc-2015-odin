@@ -5,7 +5,7 @@ import "core:os"
 import "core:strings"
 import "core:strconv"
 
-read_input_file :: proc(index : int) -> (string, bool)
+read_input_file :: proc(index : int) -> (string, bool) 
 {
     // Create filename
     file_name : string;
@@ -27,7 +27,7 @@ read_input_file :: proc(index : int) -> (string, bool)
     return string(data), success;
 }
 
-read_user_input :: proc(data: []byte, length: int) -> bool
+read_user_input :: proc(data: []byte, length: int) -> bool 
 {
     index := 0;
     for index < length
@@ -49,7 +49,7 @@ read_user_input :: proc(data: []byte, length: int) -> bool
     return false;
 }
 
-day_one :: proc(input : string)
+day_one :: proc(input : string) 
 {
     pt2 :: true;
     position := 1;
@@ -78,7 +78,55 @@ day_one :: proc(input : string)
     fmt.println("Final floor: ", floor);
 }
 
-main :: proc()
+min :: proc(a : int, b : int, c : int) -> int
+{ 
+    a_b := a;
+    if b < a do a_b = b;
+    if c < a_b do return c;
+    return a_b;
+}
+
+day_two :: proc(input : string) 
+{
+    pt2 :: false;
+
+    // Array of l,w,h, l,w,h, ...
+    box_sizes := make([dynamic]int);
+    
+    // Parse individual numbers via slicing
+    num_start_index := 0;
+    char_index := 0;
+    
+    for c in input 
+    {
+        switch c 
+        {
+            case 'x':
+                fallthrough;
+            case '\n':
+                size := strconv.atoi(input[num_start_index : char_index]);
+                append(&box_sizes, size);
+                num_start_index = char_index + 1;
+        }
+        char_index = char_index + 1;
+    }
+
+    // Calculate surface areas + slack
+    wrapping_paper := 0;
+
+    for box_index := 0; box_index < len(box_sizes); box_index = box_index + 3
+    {
+        l_w := box_sizes[box_index    ] * box_sizes[box_index + 1];
+        w_h := box_sizes[box_index + 1] * box_sizes[box_index + 2];
+        l_h := box_sizes[box_index    ] * box_sizes[box_index + 2];
+
+        wrapping_paper += 2 * (l_w + w_h + l_h) + min(l_w, w_h, l_h);
+    }
+
+    fmt.println("Total wrapping paper required: ", wrapping_paper, " sq ft.");
+}
+
+main :: proc() 
 {
     user_input := make([]byte, 4);
 
@@ -100,7 +148,6 @@ main :: proc()
             return;
         }
 
-
         day_number, ok := strconv.parse_int(string(user_input));
         if !ok 
         {
@@ -119,6 +166,8 @@ main :: proc()
         {
             case 1:
                 day_one(input);
+            case 2:
+                day_two(input);
             case 2..25:
                 fmt.println("Day not implemented");
             case :
@@ -127,5 +176,4 @@ main :: proc()
 
         delete(input);
     }
-
 }
