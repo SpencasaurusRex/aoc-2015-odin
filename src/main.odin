@@ -5,7 +5,7 @@ import "core:os"
 import "core:strings"
 import "core:strconv"
 
-read_input_file :: proc(index : int) -> (string, bool) 
+read_input_file :: proc(index: int) -> (string, bool) 
 {
     // Create filename
     file_name : string;
@@ -49,7 +49,7 @@ read_user_input :: proc(data: []byte, length: int) -> bool
     return false;
 }
 
-day_one :: proc(input : string) 
+day_one :: proc(input: string) 
 {
     pt2 :: true;
     position := 1;
@@ -78,15 +78,15 @@ day_one :: proc(input : string)
     fmt.println("Final floor: ", floor);
 }
 
-min :: proc(a : int, b : int, c : int) -> int
+min :: proc(a: int, b: int, c: int) -> int
 { 
-    a_b := a;
-    if b < a do a_b = b;
-    if c < a_b do return c;
-    return a_b;
+    m := a;
+    if b < m do m = b;
+    if c < m do m = c;
+    return m;
 }
 
-day_two :: proc(input : string) 
+day_two :: proc(input: string) 
 {
     pt2 :: true;
     
@@ -145,6 +145,83 @@ day_two :: proc(input : string)
     if pt2 do fmt.println("Total ribbon needed:", ribbon, "ft.");
 }
 
+print_binary :: proc(num: int)
+{
+    bit_mask : int = 1 << 62;
+    i : uint = 62;
+    for
+    {
+        digit := (num & bit_mask) >> i;
+        fmt.print(digit);
+        bit_mask = bit_mask >> 1;
+        if i == 0 
+        {
+            fmt.println();
+            return;
+        }
+        i = i - 1;
+    }
+}
+
+// Custom hashing algorithm, putting y into left 32 bits and x into right 32 bits
+hash_2D :: proc(x: int, y: int) -> i64
+{
+    mask_32 := 1 << 32 - 1;
+
+    x_32 := i64(x & mask_32);
+    y_32 := i64(y & mask_32);
+
+    hash : i64 = y_32 << 32 + x_32;
+
+    return hash;
+}
+
+
+day_three :: proc(input: string)
+{
+    pt2 :: false;
+
+    // Record coordinates as we go
+    m := make(map[i64]int);
+
+    x := 0;
+    y := 0;
+    houses := 1;
+
+    // Record visiting 0
+    m[hash_2D(x, y)] = 1;
+
+    for c in input 
+    {
+        switch c 
+        {
+            case '^':
+                y = y + 1;
+            case 'v':
+                y = y - 1;
+            case '>':
+                x = x + 1;
+            case '<':
+                x = x - 1;
+        }
+        fmt.print("Visiting", x, ",", y);
+
+        hash := hash_2D(x, y);
+        fmt.print(" Hash:", hash);
+
+        exists := hash in m;
+        if !exists 
+        {
+            m[hash] = 1;
+            houses = houses + 1;
+            fmt.print(" new", houses);
+        }
+        fmt.println();
+    }
+
+    fmt.println("Unique houses visited:", houses);
+}
+
 main :: proc() 
 {
     user_input := make([]byte, 4);
@@ -166,6 +243,7 @@ main :: proc()
         {
             return;
         }
+        delete(lower_user_input);
 
         day_number, ok := strconv.parse_int(string(user_input));
         if !ok 
@@ -187,7 +265,9 @@ main :: proc()
                 day_one(input);
             case 2:
                 day_two(input);
-            case 3..25:
+            case 3:
+                day_three(input);
+            case 4..25:
                 fmt.println("Day not implemented");
             case :
                 fmt.println("Please enter a valid number day");
