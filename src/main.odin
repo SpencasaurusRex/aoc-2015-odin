@@ -62,13 +62,13 @@ day_one :: proc(input : string)
         else
         if c == ')' do floor = floor - 1;
         else
-        do fmt.println("Invalid character: ", c);
+        do fmt.println("Invalid character:", c);
 
         if pt2 && !reached_basement
         {
             if floor < 0 
             {
-                fmt.println("Reached basement at position: ", position);
+                fmt.println("Reached basement at position:", position);
                 reached_basement = true;
             }
             position = position + 1;
@@ -88,8 +88,8 @@ min :: proc(a : int, b : int, c : int) -> int
 
 day_two :: proc(input : string) 
 {
-    pt2 :: false;
-
+    pt2 :: true;
+    
     // Array of l,w,h, l,w,h, ...
     box_sizes := make([dynamic]int);
     
@@ -113,17 +113,35 @@ day_two :: proc(input : string)
 
     // Calculate surface areas + slack
     wrapping_paper := 0;
+    ribbon := 0;
 
     for box_index := 0; box_index < len(box_sizes); box_index = box_index + 3
     {
-        l_w := box_sizes[box_index    ] * box_sizes[box_index + 1];
-        w_h := box_sizes[box_index + 1] * box_sizes[box_index + 2];
-        l_h := box_sizes[box_index    ] * box_sizes[box_index + 2];
+        l := box_sizes[box_index];
+        w := box_sizes[box_index + 1];
+        h := box_sizes[box_index + 2];
 
-        wrapping_paper += 2 * (l_w + w_h + l_h) + min(l_w, w_h, l_h);
+        l_w := l * w;
+        w_h := w * h;
+        l_h := l * h;
+
+        surface := 2 * (l_w + w_h + l_h);
+        slack := min(l_w, w_h, l_h);
+
+        wrapping_paper += surface + slack;
+
+        if pt2
+        {
+            perimeter_l_w := 2 * (l + w);
+            perimeter_w_h := 2 * (w + h);
+            perimeter_l_h := 2 * (l + h);
+
+            ribbon = ribbon + min(perimeter_l_w, perimeter_w_h, perimeter_l_h) + l * w * h;
+        }
     }
 
-    fmt.println("Total wrapping paper required: ", wrapping_paper, " sq ft.");
+    fmt.println("Total wrapping paper required:", wrapping_paper, "sq ft.");
+    if pt2 do fmt.println("Total ribbon needed:", ribbon, "ft.");
 }
 
 main :: proc() 
@@ -168,7 +186,7 @@ main :: proc()
                 day_one(input);
             case 2:
                 day_two(input);
-            case 2..25:
+            case 3..25:
                 fmt.println("Day not implemented");
             case :
                 fmt.println("Please enter a valid number day");
