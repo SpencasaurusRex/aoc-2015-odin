@@ -78,13 +78,26 @@ day_one :: proc(input: string)
     fmt.println("Final floor: ", floor);
 }
 
-min :: proc(a: int, b: int, c: int) -> int
+min_two :: proc(a: int, b: int) -> int
+{ 
+    m := a;
+    if b < m do m = b;
+    return m;
+}
+
+min_three :: proc(a: int, b: int, c: int) -> int
 { 
     m := a;
     if b < m do m = b;
     if c < m do m = c;
     return m;
 }
+
+min :: proc
+{
+    min_two,
+    min_three
+};
 
 day_two :: proc(input: string) 
 {
@@ -534,37 +547,81 @@ to_index :: proc(x: int, y: int) -> int
     return y * 1000 + x;
 }
 
+max :: proc(a: int, b: int) -> int
+{
+    m := a;
+    if b > a do m = b;
+    return m;
+}
+
 day_six :: proc(input: string)
 {
     commands:= parse_commands(input);
     defer delete(commands);
 
-    lights := make([]bool, 1_000_000);
+    pt2 :: true;
 
-    // Execute all commands
-    for i := 0; i < len(commands); i=i+1
+    if !pt2
     {
-        command := commands[i];
-        for y := command.lower_y; y <= command.upper_y; y=y+1 do 
-        for x := command.lower_x; x <= command.upper_x; x=x+1 
+        lights := make([]bool, 1_000_000);
+        defer delete(lights);
+
+        // Execute all commands
+        for i := 0; i < len(commands); i=i+1
         {
-            index := to_index(x, y);
-            if command.type == CommandType.turn_on do
-                lights[index] = true;
-            else if command.type == CommandType.turn_off do
-                lights[index] = false;
-            else if command.type == CommandType.toggle do
-                lights[index] = !lights[index];
+            command := commands[i];
+            for y := command.lower_y; y <= command.upper_y; y=y+1 do 
+            for x := command.lower_x; x <= command.upper_x; x=x+1 
+            {
+                index := to_index(x, y);
+                if command.type == CommandType.turn_on do
+                    lights[index] = true;
+                else if command.type == CommandType.turn_off do
+                    lights[index] = false;
+                else if command.type == CommandType.toggle do
+                    lights[index] = !lights[index];
+            }
         }
-    }
 
-    number_of_lights_on := 0;
-    for i := 0; i < len(lights); i=i+1
+        number_of_lights_on := 0;
+        for i := 0; i < len(lights); i=i+1
+        {
+            if lights[i] do number_of_lights_on = number_of_lights_on + 1;
+        }
+
+        fmt.println("Total number of lights on:", number_of_lights_on);    
+    }
+    else
     {
-        if lights[i] do number_of_lights_on = number_of_lights_on + 1;
-    }
+        lights := make([]int, 1_000_000);
+        defer delete(lights);
 
-    fmt.println("Total number of lights on:", number_of_lights_on);
+        // Execute all commands
+        for i := 0; i < len(commands); i=i+1
+        {
+            command := commands[i];
+            for y := command.lower_y; y <= command.upper_y; y=y+1 do 
+            for x := command.lower_x; x <= command.upper_x; x=x+1 
+            {
+                index := to_index(x, y);
+                current := lights[index];
+                if command.type == CommandType.turn_on do
+                    lights[index] = current + 1;
+                else if command.type == CommandType.turn_off do
+                    lights[index] = max(current - 1, 0);
+                else if command.type == CommandType.toggle do
+                    lights[index] = current + 2;
+            }
+        }
+
+        total_brightness := 0;
+        for i := 0; i < len(lights); i=i+1
+        {
+            total_brightness = total_brightness + lights[i];
+        }
+
+        fmt.println("Total brightness:", total_brightness);
+    }
 }
 
 main :: proc() 
