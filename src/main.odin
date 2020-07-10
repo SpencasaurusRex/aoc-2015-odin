@@ -276,6 +276,61 @@ day_three :: proc(input: string)
     }
 }
 
+is_vowel :: proc(c: rune) -> bool
+{
+    if c == 'a' do return true;
+    if c == 'e' do return true;
+    if c == 'i' do return true;
+    if c == 'o' do return true;
+    if c == 'u' do return true;
+    return false;
+}
+
+is_naughty_string :: proc(prev_c: rune, c: rune) -> bool
+{
+    // ab, cd, pq, or xy
+    if prev_c == 'a' && c == 'b' do return true;
+    if prev_c == 'c' && c == 'd' do return true;
+    if prev_c == 'p' && c == 'q' do return true;
+    if prev_c == 'x' && c == 'y' do return true;
+    return false;
+}
+
+day_five :: proc(input: string)
+{
+    prev_c := ' ';
+    duplicate := false;
+    vowel_count := 0;
+    invalid := false;
+
+    nice_word_count := 0;
+
+    for c in input 
+    {
+        switch c
+        {
+            case '\n':
+                // Check conditions
+                if !invalid && vowel_count >= 3 && duplicate 
+                {
+                    nice_word_count = nice_word_count + 1;
+                }
+
+                prev_c = ' ';
+                duplicate = false;
+                vowel_count = 0;
+                invalid = false;
+            case:
+                if is_vowel(c) do vowel_count = vowel_count + 1;
+                if prev_c == c do duplicate = true;
+                if is_naughty_string(prev_c, c) do invalid = true;
+                prev_c = c;
+        }
+    }
+
+    fmt.println("Number of nice words:", nice_word_count);
+}
+
 main :: proc() 
 {
     user_input := make([]byte, 4);
@@ -321,6 +376,8 @@ main :: proc()
                 day_two(input);
             case 3:
                 day_three(input);
+            case 5:
+                day_five(input);
             case 4..25:
                 fmt.println("Day not implemented");
             case :
