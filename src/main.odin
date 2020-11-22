@@ -788,6 +788,9 @@ create_token :: proc(value: string) -> Token
 
 day_seven :: proc(input : string)
 {
+
+    pt2 :: true;
+
     tokens := make([dynamic]Token);
     operations := make([dynamic]Operation);
     operation_lookup := make(map[string]Operation);
@@ -825,15 +828,12 @@ day_seven :: proc(input : string)
         operation_lookup[operation.result^.value] = operation;
     }
 
+    if pt2
+    {
+        operation_lookup["b"].operand_1.value = "956";
+    }
+
     fmt.println(get_value("a", &operations, &operation_lookup, &values));
-    // fmt.println(get_value("x", &operations, &operation_lookup));
-    // fmt.println(get_value("y", &operations, &operation_lookup));
-    // fmt.println(get_value("d", &operations, &operation_lookup));
-    // fmt.println(get_value("e", &operations, &operation_lookup));
-    // fmt.println(get_value("f", &operations, &operation_lookup));
-    // fmt.println(get_value("g", &operations, &operation_lookup));
-    // fmt.println(get_value("h", &operations, &operation_lookup));
-    // fmt.println(get_value("i", &operations, &operation_lookup));
 }
 
 get_value :: proc(key: string, operations: ^[dynamic]Operation, operation_lookup: ^map[string]Operation, values: ^map[string]int) -> int
