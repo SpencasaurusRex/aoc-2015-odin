@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:strconv"
+import "core:container"
 
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -383,7 +384,7 @@ day_five :: proc(input: string)
                 case '\n':
                     // Check conditions
                     dd := has_double_pair(pairs);
-                    fmt.println("Stagger:", stagger, "DD:", dd);
+                    // fmt.println("Stagger:", stagger, "DD:", dd);
                     if stagger && dd 
                     {
                         nice_word_count = nice_word_count + 1;
@@ -394,24 +395,24 @@ day_five :: proc(input: string)
                     stagger = false;
                     char_pos = 0;
                 case:
-                    fmt.print(prev_prev_c, prev_c, c);
+                    // fmt.print(prev_prev_c, prev_c, c);
                     if prev_prev_c == c do stagger = true;
-                    fmt.print(" Stagger:", stagger);
+                    // fmt.print(" Stagger:", stagger);
                     if char_pos >= 1 
                     {
                         pairs[char_pos - 1] = hash_2D(int(prev_c), int(c));
                     }
                     
-                    fmt.print(" pair: ");
-                    for i:=0; i<len(pairs);i=i+1
-                    {
-                        fmt.print(pairs[i], "|");
-                    }
+                    // fmt.print(" pair: ");
+                    // for i:=0; i<len(pairs);i=i+1
+                    // {
+                    //     fmt.print(pairs[i], "|");
+                    // }
 
                     prev_prev_c = prev_c;
                     prev_c = c;
                     char_pos = char_pos + 1;
-                    fmt.println();
+                    // fmt.println();
             }
         }
     }
@@ -570,16 +571,24 @@ day_six :: proc(input: string)
         for i := 0; i < len(commands); i=i+1
         {
             command := commands[i];
-            for y := command.lower_y; y <= command.upper_y; y=y+1 do 
-            for x := command.lower_x; x <= command.upper_x; x=x+1 
+            for y := command.lower_y; y <= command.upper_y; y=y+1
             {
-                index := to_index(x, y);
-                if command.type == CommandType.turn_on do
-                    lights[index] = true;
-                else if command.type == CommandType.turn_off do
-                    lights[index] = false;
-                else if command.type == CommandType.toggle do
-                    lights[index] = !lights[index];
+                for x := command.lower_x; x <= command.upper_x; x=x+1 
+                {
+                    index := to_index(x, y);
+                    if command.type == CommandType.turn_on
+                    {
+                        lights[index] = true;
+                    }
+                    else if command.type == CommandType.turn_off
+                    {
+                        lights[index] = false;
+                    }
+                    else if command.type == CommandType.toggle
+                    {
+                        lights[index] = !lights[index];
+                    }
+                }    
             }
         }
 
@@ -591,7 +600,7 @@ day_six :: proc(input: string)
 
         fmt.println("Total number of lights on:", number_of_lights_on);    
     }
-    else
+    
     {
         lights := make([]int, 1_000_000);
         defer delete(lights);
@@ -600,17 +609,25 @@ day_six :: proc(input: string)
         for i := 0; i < len(commands); i=i+1
         {
             command := commands[i];
-            for y := command.lower_y; y <= command.upper_y; y=y+1 do 
-            for x := command.lower_x; x <= command.upper_x; x=x+1 
+            for y := command.lower_y; y <= command.upper_y; y=y+1
             {
-                index := to_index(x, y);
-                current := lights[index];
-                if command.type == CommandType.turn_on do
-                    lights[index] = current + 1;
-                else if command.type == CommandType.turn_off do
-                    lights[index] = max(current - 1, 0);
-                else if command.type == CommandType.toggle do
-                    lights[index] = current + 2;
+                for x := command.lower_x; x <= command.upper_x; x=x+1 
+                {
+                    index := to_index(x, y);
+                    current := lights[index];
+                    if command.type == CommandType.turn_on 
+                    {
+                        lights[index] = current + 1;
+                    }
+                    else if command.type == CommandType.turn_off
+                    {
+                        lights[index] = max(current - 1, 0);
+                    }
+                    else if command.type == CommandType.toggle
+                    {
+                        lights[index] = current + 2;
+                    }
+                }
             }
         }
 
@@ -621,6 +638,276 @@ day_six :: proc(input: string)
         }
 
         fmt.println("Total brightness:", total_brightness);
+    }
+}
+
+TokenType :: enum
+{
+    VALUE,
+    IDENTIFIER,
+    AND,
+    OR,
+    RSHIFT,
+    LSHIFT,
+    NOT,
+    ARROW,
+    NEWLINE
+}
+
+Token :: struct
+{
+    type: TokenType,
+    value: string
+}
+
+OperationType :: enum
+{
+    AND,
+    OR,
+    RSHIFT,
+    LSHIFT,
+    NOT,
+    ASSIGN
+}
+
+Operation :: struct
+{
+    operand_1: ^Token,
+    operand_2: ^Token,
+    type: OperationType,
+    result: ^Token
+}
+
+day_seven_parse :: proc(tokens: ^[dynamic]Token, operations: ^[dynamic]Operation)
+{
+    next_token :: proc(tokens: ^[dynamic]Token, i: ^int) -> (bool, ^Token)
+    {
+        i^ = i^ + 1;
+        valid := len(tokens) > i^;
+        token := &tokens^[i^ - 1] if valid else nil;
+        return valid, token;
+    }
+
+    i := 0;
+    token_set : [6]^Token;
+    next := true;
+
+    MAX_TOKENS :: 6;
+
+    for next
+    {
+        // Form operation
+        op: Operation;
+
+        fmt.println();
+        for j:=0; j < MAX_TOKENS && next; j = j + 1
+        {
+            next, token_set[j] = next_token(tokens, &i);
+            fmt.println(token_set[j]);
+            if !next || token_set[j].type == .NEWLINE
+            {
+                break;
+            }
+        }
+
+        op.operand_1 = token_set[0];
+        op.operand_2 = token_set[2];
+        op.result = token_set[4];
+
+        #partial switch token_set[1].type
+        {
+            case TokenType.AND:
+                op.type = OperationType.AND;
+            case TokenType.OR:
+                op.type = OperationType.OR;
+            case TokenType.LSHIFT:
+                op.type = OperationType.LSHIFT;
+            case TokenType.RSHIFT:
+                op.type = OperationType.RSHIFT; 
+            case TokenType.ARROW: 
+                op.operand_1 = token_set[0];
+                op.operand_2 = nil;
+                op.result = token_set[2];
+                op.type = OperationType.ASSIGN;
+            case:
+                if token_set[0].type == TokenType.NOT && token_set[1].type == TokenType.IDENTIFIER
+                {
+                    op.operand_1 = token_set[1];
+                    op.operand_2 = nil;
+                    op.result = token_set[3];
+                    op.type = OperationType.NOT;
+                }
+                else 
+                {
+                    fmt.println("Aaaaaaah, unknown operation");
+                }  
+        }
+
+        fmt.println(op);
+        append(operations, op);
+    }
+}
+
+create_token :: proc(value: string) -> Token
+{
+    using TokenType;
+
+    token : Token;
+    token.value = value;
+
+    switch value 
+    {
+        case "NOT":
+            token.type = NOT;
+        case "AND":
+            token.type = AND;
+        case "OR":
+            token.type = OR;
+        case "RSHIFT":
+            token.type = RSHIFT;
+        case "LSHIFT":
+            token.type = LSHIFT;
+        case "->":
+            token.type = ARROW;
+        case "\n":
+            token.type = NEWLINE;
+        case: 
+            switch value[0]
+            {
+                case 'a'..'z':
+                    token.type = IDENTIFIER;
+                case '0'..'9':
+                    token.type = VALUE;
+                case:
+                    fmt.println("Uh oh");
+            }
+    }
+    //fmt.println(token.value, token.type);
+    return token;
+}
+
+day_seven :: proc(input : string)
+{
+    tokens := make([dynamic]Token);
+    operations := make([dynamic]Operation);
+    operation_lookup := make(map[string]Operation);
+
+    fmt.println("Tokenizing");
+    left := 0;
+    right := 0;
+    for c in input
+    {
+        switch c
+        {
+            case ' ': fallthrough;
+            case '\r':
+                append(&tokens, create_token(input[left:right]));
+                left = right + 1;
+            
+            case '\n': 
+                append(&tokens, create_token("\n"));
+                left = right + 1;       
+        }
+
+        right = right + 1;
+    }
+
+    fmt.println("Parsing");
+    day_seven_parse(&tokens, &operations);
+
+    
+    fmt.println("Simulating");
+    using OperationType;
+    values := make(map[string]int);
+
+    for operation in operations 
+    {
+        operation_lookup[operation.result^.value] = operation;
+    }
+
+    fmt.println(get_value("a", &operations, &operation_lookup, &values));
+    // fmt.println(get_value("x", &operations, &operation_lookup));
+    // fmt.println(get_value("y", &operations, &operation_lookup));
+    // fmt.println(get_value("d", &operations, &operation_lookup));
+    // fmt.println(get_value("e", &operations, &operation_lookup));
+    // fmt.println(get_value("f", &operations, &operation_lookup));
+    // fmt.println(get_value("g", &operations, &operation_lookup));
+    // fmt.println(get_value("h", &operations, &operation_lookup));
+    // fmt.println(get_value("i", &operations, &operation_lookup));
+}
+
+get_value :: proc(key: string, operations: ^[dynamic]Operation, operation_lookup: ^map[string]Operation, values: ^map[string]int) -> int
+{
+    operation := operation_lookup[key];
+    //fmt.println("Operation that results in", key, ":", operation);
+
+    result := operation.result.value;
+
+    operand_1 : int;
+    operand_2 : int;
+
+    if operation.operand_1 != nil
+    {
+        if operation.operand_1.type == TokenType.VALUE
+        {
+            operand_1,_ = strconv.parse_int(operation.operand_1.value);
+        }
+        else if operation.operand_1.value in values^
+        {
+            operand_1 = values[operation.operand_1.value];
+        }
+        else
+        {
+            operand_1 = get_value(operation.operand_1.value, operations, operation_lookup, values);
+        }
+        values[operation.operand_1.value] = operand_1;
+    }
+    if operation.operand_2 != nil
+    {
+        if operation.operand_2.type == TokenType.VALUE
+        {
+            operand_2,_ = strconv.parse_int(operation.operand_2.value);
+        }
+        else if operation.operand_2.value in values^
+        {
+            operand_2 = values[operation.operand_2.value];
+        }
+        else
+        {
+            operand_2 = get_value(operation.operand_2.value, operations, operation_lookup, values);
+        }
+        values[operation.operand_2.value] = operand_2;
+    }
+
+    if operation.type == OperationType.ASSIGN
+    {
+        fmt.println("Assigning", operand_1, "to", result);
+        return operand_1;
+    }
+    else if operation.type == OperationType.AND
+    {
+        fmt.println("Assigning", operand_1, "AND", operand_2, operand_1 & operand_2, "to", result);
+        return operand_1 & operand_2;
+    }
+    else if operation.type == OperationType.OR
+    {
+        fmt.println("Assigning", operand_1, "OR", operand_2, ":", operand_1 | operand_2, "to", result);
+        return operand_1 | operand_2;
+    }
+    else if operation.type == OperationType.NOT
+    {
+        fmt.println("Assigning NOT", operand_1, ":", 65535 - operand_1, "to", result);
+        return 65535 - operand_1;
+    }
+    else if operation.type == OperationType.LSHIFT 
+    {
+        fmt.println("Assigning", operand_1, "LSHIFT", operand_2, ":", operand_1 << u32(operand_2), "to", result);
+        return operand_1 << u32(operand_2);
+    }
+    else
+    {
+        fmt.println("Assigning", operand_1, "RSHIFT", operand_2, ":", operand_1 >> u32(operand_2), "to", result);
+        return operand_1 >> u32(operand_2);
     }
 }
 
@@ -673,7 +960,21 @@ main :: proc()
                 day_five(input);
             case 6:
                 day_six(input);
-            case 4..25:
+            case 7:
+                day_seven(input);
+            // case 8:
+            //     day_eight(input);
+            // case 9:
+            //     day_nine(input);
+            // case 10:
+            //     day_ten(input);
+            // case 11:
+            //     day_eleven(input);
+            // case 12:
+            //     day_twelve(input);
+            // case 13:
+            //     day_thirteen(input);
+            case 8..25:
                 fmt.println("Day not implemented");
             case :
                 fmt.println("Please enter a valid number day");
@@ -682,3 +983,47 @@ main :: proc()
         delete(input);
     }
 }
+
+/*
+1 AND C -> B
+B RSHIFT D -> A
+NOT 2 -> C
+4 LSHIFT 2 -> D
+
+     4
+    /
+   D - LSHIFT
+  / \
+ /   2
+A - RSHIFT
+ \   1
+  \ /
+   B - AND
+    \   2
+     \ /
+      C - NOT
+
+Node A
+    name:  A
+    type:  RSHIFT
+    left:  B
+    right: D
+
+Node B
+    name:  A
+    type:  AND
+    left:  B
+    right: D
+
+Node C
+    name:  A
+    type:  RSHIFT
+    left:  B
+    right: D
+
+Node D
+    name:  A
+    type:  RSHIFT
+    left:  B
+    right: D
+    */
