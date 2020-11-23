@@ -786,7 +786,7 @@ create_token :: proc(value: string) -> Token
     return token;
 }
 
-day_seven :: proc(input : string)
+day_seven :: proc(input: string)
 {
 
     pt2 :: true;
@@ -911,6 +911,59 @@ get_value :: proc(key: string, operations: ^[dynamic]Operation, operation_lookup
     }
 }
 
+
+day_eight :: proc(input: string)
+{
+    code_characters := 0;
+    string_characters := 0;
+    escaping := false;
+
+    for c in input
+    {
+        switch c
+        {
+            case '\r': fallthrough;
+            case '\n': continue;
+            case '\\':
+                if escaping
+                {
+                    escaping = false;
+                    string_characters = string_characters + 1;
+                }
+                else
+                {
+                    escaping = true;
+                }
+            case '"':
+                if escaping 
+                {
+                    escaping = false;
+                    string_characters = string_characters + 1;
+                }
+            case 'x':
+                if escaping
+                {
+                    escaping = false;
+                    string_characters = string_characters - 1;
+                }
+                else
+                {
+                    string_characters = string_characters + 1;
+                }
+            case:
+                string_characters = string_characters + 1;
+
+        }
+        code_characters = code_characters + 1;
+    }
+
+    //fmt.println("Processed", c, " code_characters:", code_characters, " string_characters:", string_characters, " escaping:", escaping);
+
+    fmt.println("Code characters:", code_characters);
+    fmt.println("String characters:", string_characters);
+    fmt.println("Result:", code_characters - string_characters);
+}
+
 main :: proc() 
 {
     user_input := make([]byte, 4);
@@ -962,8 +1015,8 @@ main :: proc()
                 day_six(input);
             case 7:
                 day_seven(input);
-            // case 8:
-            //     day_eight(input);
+            case 8:
+                day_eight(input);
             // case 9:
             //     day_nine(input);
             // case 10:
