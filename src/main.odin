@@ -1135,8 +1135,12 @@ look_and_say:: proc(input: string) -> string
 
 day_ten :: proc(input: string)
 {
+    pt2 :: true;
+
     result := input;
-    for i := 0; i < 40; i = i + 1 
+    iterations := 50 if pt2 else 40;
+
+    for i := 0; i < iterations; i = i + 1 
     {
         result = look_and_say(result);
     }
