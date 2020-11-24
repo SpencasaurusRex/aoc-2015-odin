@@ -1229,6 +1229,37 @@ day_eleven :: proc(input: string)
 }
 
 
+day_twelve :: proc(input: string)
+{
+    left := 0;
+    right := 0;
+    total := 0;
+
+    last_was_digit := false;
+
+    for c in input
+    {
+        switch c
+        {
+            case '0'..'9', '-':
+                right = right + 1;
+                last_was_digit = true;
+            case:
+                if last_was_digit
+                {
+                    value,_ := strconv.parse_int(input[left:right]);
+                    total = total + value;
+                    last_was_digit = false;
+                }
+                right = right + 1;
+                left = right;
+        }
+    }
+
+    fmt.println(total);
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -1336,8 +1367,8 @@ main :: proc()
                 day_ten(input);
             case 11:
                 day_eleven(input);
-            // case 12:
-            //     day_twelve(input);
+            case 12:
+                day_twelve(input);
             // case 13:
             //     day_thirteen(input);
             case 10..25:
