@@ -1209,13 +1209,19 @@ increment_word :: proc(word: ^strings.Builder)
 
 day_eleven :: proc(input: string)
 {
+    pt2 :: true;
+
     password := strings.make_builder();
     strings.write_string(&password, input);
 
     for
     {
         increment_word(&password);
-        //fmt.println(strings.to_string(password));
+        if valid_pass(&password) do break;
+    }
+    if pt2 do for
+    {
+        increment_word(&password);
         if valid_pass(&password) do break;
     }
 
