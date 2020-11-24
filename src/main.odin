@@ -915,9 +915,9 @@ get_value :: proc(key: string, operations: ^[dynamic]Operation, operation_lookup
 day_eight :: proc(input: string)
 {
     
-    part_2 :: true;
+    pt2 :: true;
 
-    if !part_2
+    if !pt2
     {
         code_characters := 0;
         string_characters := 0;
@@ -1000,7 +1000,7 @@ day_eight :: proc(input: string)
 LOCATIONS :: 8;
 
 
-evaluate_distance :: proc(shortest: ^int, indices: ^[LOCATIONS]int, distances: ^map[i64]int)
+evaluate_distance :: proc(best: ^int, indices: ^[LOCATIONS]int, distances: ^map[i64]int, pt2: bool)
 {
     location := indices[0];
     total_distance := 0;
@@ -1014,10 +1014,10 @@ evaluate_distance :: proc(shortest: ^int, indices: ^[LOCATIONS]int, distances: ^
         location = next_location;
     }
     
-    if total_distance < shortest^
-    {
-        shortest^ = total_distance;
-    }
+    // eval := max if pt2 else min;
+    // best^ = eval(best^, total_distance);
+    best^ = max(best^, total_distance) if pt2 else min(best^, total_distance);
+    
 }
 
 
@@ -1029,6 +1029,8 @@ swap :: proc(x, y: int) -> (int, int)
 
 day_nine :: proc(input: string)
 {
+    pt2 :: true;
+
     distances := make(map[i64]int);
     
     left := 0;
@@ -1071,9 +1073,9 @@ day_nine :: proc(input: string)
     for i := 0; i < n; i = i + 1 do c[i] = 0;
 
     i := 0;
-    shortest := 99999;
+    best := 0 if pt2 else 99999;
 
-    evaluate_distance(&shortest, &a, &distances);
+    evaluate_distance(&best, &a, &distances, pt2);
 
     for i < n
     {
@@ -1088,7 +1090,7 @@ day_nine :: proc(input: string)
                 a[c[i]], a[i] = swap(a[c[i]], a[i]);
             }
 
-            evaluate_distance(&shortest, &a, &distances);
+            evaluate_distance(&best, &a, &distances, pt2);
 
             c[i] = c[i] + 1;
             i = 0;
@@ -1100,7 +1102,7 @@ day_nine :: proc(input: string)
         }
     }
     
-    fmt.println("Shortest distance:", shortest);
+    fmt.println("Best distance:", best);
 }
 
 
