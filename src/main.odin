@@ -1106,6 +1106,45 @@ day_nine :: proc(input: string)
 }
 
 
+look_and_say:: proc(input: string) -> string
+{
+    output := strings.make_builder();
+    last: rune;
+    count := 1;
+    length := len(input);
+    
+    for i := 0; i < length; i = i + 1
+    {
+        c := input[i];
+        next := input[i+1] if i+1 < length else ' ';
+
+        if c == next
+        {
+            count = count + 1;
+        }
+        else
+        {
+            strings.write_int(&output, count);
+            strings.write_rune(&output, rune(c));
+            count = 1;
+        }
+    }
+
+    return strings.to_string(output);
+}
+
+day_ten :: proc(input: string)
+{
+    result := input;
+    for i := 0; i < 40; i = i + 1 
+    {
+        result = look_and_say(result);
+    }
+
+    fmt.println(len(result));
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -1209,8 +1248,8 @@ main :: proc()
                 day_eight(input);
             case 9:
                 day_nine(input);
-            // case 10:
-            //     day_ten(input);
+            case 10:
+                day_ten(input);
             // case 11:
             //     day_eleven(input);
             // case 12:
