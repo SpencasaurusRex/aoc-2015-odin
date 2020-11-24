@@ -1149,6 +1149,80 @@ day_ten :: proc(input: string)
 }
 
 
+valid_pass :: proc(word: ^strings.Builder) -> bool
+{
+    length := len(word.buf);
+    
+    three_letter_run := false;
+    pairs := 0;
+
+    for i := 0; i < length - 2; i = i + 1
+    {
+        if word.buf[i+0] + 1 == word.buf[i+1]
+        && word.buf[i+1] + 1 == word.buf[i+2] 
+        {
+            three_letter_run = true;
+        }
+
+        if word.buf[i] == word.buf[i+1] 
+        && word.buf[i] != word.buf[i+2]
+        {
+            pairs = pairs + 1;
+        }
+    }
+
+    // Check for pair at end
+    if word.buf[length-3] != word.buf[length-2] 
+    && word.buf[length-2] == word.buf[length-1]
+    {
+        pairs = pairs + 1;
+    }
+
+    return three_letter_run && pairs >= 2;
+}
+
+
+increment_word :: proc(word: ^strings.Builder)
+{
+    end := len(word.buf) - 1;
+    for i := 0; i < end; i = i + 1
+    {
+        next_val := word.buf[end - i] + 1;
+        if next_val == byte('z' + 1)
+        {
+            word.buf[end - i] = 'a';
+        }
+        else if next_val == 'i' || next_val == 'o' || next_val == 'l'
+        {
+            // Skip blacklisted letters
+            word.buf[end - i] = next_val + 1;
+            break;
+        }
+        else
+        {
+            word.buf[end - i] = next_val;
+            break;
+        }
+    }
+}
+
+
+day_eleven :: proc(input: string)
+{
+    password := strings.make_builder();
+    strings.write_string(&password, input);
+
+    for
+    {
+        increment_word(&password);
+        //fmt.println(strings.to_string(password));
+        if valid_pass(&password) do break;
+    }
+
+    fmt.println(strings.to_string(password));
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -1254,8 +1328,8 @@ main :: proc()
                 day_nine(input);
             case 10:
                 day_ten(input);
-            // case 11:
-            //     day_eleven(input);
+            case 11:
+                day_eleven(input);
             // case 12:
             //     day_twelve(input);
             // case 13:
