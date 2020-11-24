@@ -6,50 +6,72 @@ import "core:strings"
 import "core:strconv"
 import "core:container"
 
-read_input_file :: proc(index: int) -> (string, bool) 
-{
-    // Create filename
-    file_name : string;
-    {
-        inputs_prefix  :: "..\\inputs\\";
-        inputs_postfix :: ".txt";
-        
-        builder := strings.make_builder();
-        strings.write_string(&builder, inputs_prefix);
-        strings.write_int(&builder, index);
-        strings.write_string(&builder, inputs_postfix);
 
-        file_name = strings.to_string(builder);
-    }
-    
-    // Read from file
-    data, success := os.read_entire_file(file_name);
-    if !success do return "", success;
-    return string(data), success;
+// Common functions -----------------------------------------------//
+min_two :: proc(a: int, b: int) -> int
+{ 
+    m := a;
+    if b < m do m = b;
+    return m;
 }
 
-read_user_input :: proc(data: []byte, length: int) -> bool 
-{
-    index := 0;
-    for index < length
-    {
-        _, input_err := os.read(os.stdin, data[index:index+1]);
-        if input_err != 0
-        {
-            return true;
-        }
 
-        // Line feed
-        if data[index] == 10 
-        {
-            return false;
-        }
-        index = index + 1;
-    }
-
-    return false;
+min_three :: proc(a: int, b: int, c: int) -> int
+{ 
+    m := a;
+    if b < m do m = b;
+    if c < m do m = c;
+    return m;
 }
 
+
+min :: proc
+{
+    min_two,
+    min_three
+};
+
+
+max_two :: proc(a: int, b: int) -> int
+{
+    m := a;
+    if b > m do m = b;
+    return m;
+}
+
+
+max :: proc
+{
+    max_two
+};
+
+
+sort_two :: proc(a: int, b: int) -> (int, int)
+{
+    return min(a,b), max(a,b);
+}
+
+
+sort :: proc
+{
+    sort_two
+};
+
+
+hash_2D :: proc(x: int, y: int) -> i64
+{
+    mask_32 := 1 << 32 - 1;
+
+    x_32 := i64(x & mask_32);
+    y_32 := i64(y & mask_32);
+
+    hash : i64 = y_32 << 32 + x_32;
+
+    return hash;
+}
+
+
+// Puzzles --------------------------------------------------------//
 day_one :: proc(input: string) 
 {
     pt2 :: true;
@@ -79,26 +101,6 @@ day_one :: proc(input: string)
     fmt.println("Final floor: ", floor);
 }
 
-min_two :: proc(a: int, b: int) -> int
-{ 
-    m := a;
-    if b < m do m = b;
-    return m;
-}
-
-min_three :: proc(a: int, b: int, c: int) -> int
-{ 
-    m := a;
-    if b < m do m = b;
-    if c < m do m = c;
-    return m;
-}
-
-min :: proc
-{
-    min_two,
-    min_three
-};
 
 day_two :: proc(input: string) 
 {
@@ -159,6 +161,7 @@ day_two :: proc(input: string)
     if pt2 do fmt.println("Total ribbon needed:", ribbon, "ft.");
 }
 
+
 print_binary :: proc(num: int)
 {
     bit_mask : int = 1 << 62;
@@ -175,19 +178,6 @@ print_binary :: proc(num: int)
         }
         i = i - 1;
     }
-}
-
-// Custom hashing algorithm, putting y into left 32 bits and x into right 32 bits
-hash_2D :: proc(x: int, y: int) -> i64
-{
-    mask_32 := 1 << 32 - 1;
-
-    x_32 := i64(x & mask_32);
-    y_32 := i64(y & mask_32);
-
-    hash : i64 = y_32 << 32 + x_32;
-
-    return hash;
 }
 
 
@@ -290,6 +280,7 @@ day_three :: proc(input: string)
     }
 }
 
+
 is_vowel :: proc(c: rune) -> bool
 {
     if c == 'a' do return true;
@@ -300,6 +291,7 @@ is_vowel :: proc(c: rune) -> bool
     return false;
 }
 
+
 is_naughty_string :: proc(prev_c: rune, c: rune) -> bool
 {
     // ab, cd, pq, or xy
@@ -309,6 +301,7 @@ is_naughty_string :: proc(prev_c: rune, c: rune) -> bool
     if prev_c == 'x' && c == 'y' do return true;
     return false;
 }
+
 
 has_double_pair :: proc(data: []i64) -> bool
 {
@@ -328,6 +321,7 @@ has_double_pair :: proc(data: []i64) -> bool
     }
     return false;
 }
+
 
 day_five :: proc(input: string)
 {
@@ -420,12 +414,14 @@ day_five :: proc(input: string)
     fmt.println("Number of nice words:", nice_word_count);
 }
 
+
 CommandType :: enum 
 {
     turn_on,
     turn_off,
     toggle
 }
+
 
 Command :: struct
 {
@@ -435,6 +431,7 @@ Command :: struct
     upper_x : int,
     upper_y : int
 }
+
 
 parse_commands :: proc(input: string) -> [dynamic]Command
 {
@@ -543,17 +540,12 @@ parse_commands :: proc(input: string) -> [dynamic]Command
     return commands;
 }
 
+
 to_index :: proc(x: int, y: int) -> int
 {
     return y * 1000 + x;
 }
 
-max :: proc(a: int, b: int) -> int
-{
-    m := a;
-    if b > a do m = b;
-    return m;
-}
 
 day_six :: proc(input: string)
 {
@@ -641,6 +633,7 @@ day_six :: proc(input: string)
     }
 }
 
+
 TokenType :: enum
 {
     VALUE,
@@ -654,11 +647,13 @@ TokenType :: enum
     NEWLINE
 }
 
+
 Token :: struct
 {
     type: TokenType,
     value: string
 }
+
 
 OperationType :: enum
 {
@@ -670,6 +665,7 @@ OperationType :: enum
     ASSIGN
 }
 
+
 Operation :: struct
 {
     operand_1: ^Token,
@@ -677,6 +673,7 @@ Operation :: struct
     type: OperationType,
     result: ^Token
 }
+
 
 day_seven_parse :: proc(tokens: ^[dynamic]Token, operations: ^[dynamic]Operation)
 {
@@ -748,6 +745,7 @@ day_seven_parse :: proc(tokens: ^[dynamic]Token, operations: ^[dynamic]Operation
     }
 }
 
+
 create_token :: proc(value: string) -> Token
 {
     using TokenType;
@@ -785,6 +783,7 @@ create_token :: proc(value: string) -> Token
     //fmt.println(token.value, token.type);
     return token;
 }
+
 
 day_seven :: proc(input: string)
 {
@@ -835,6 +834,7 @@ day_seven :: proc(input: string)
 
     fmt.println(get_value("a", &operations, &operation_lookup, &values));
 }
+
 
 get_value :: proc(key: string, operations: ^[dynamic]Operation, operation_lookup: ^map[string]Operation, values: ^map[string]int) -> int
 {
@@ -962,8 +962,6 @@ day_eight :: proc(input: string)
             code_characters = code_characters + 1;
         }
 
-        //fmt.println("Processed", c, " code_characters:", code_characters, " string_characters:", string_characters, " escaping:", escaping);
-
         fmt.println("Code characters:", code_characters);
         fmt.println("String characters:", string_characters);
         fmt.println("Result:", code_characters - string_characters);
@@ -997,6 +995,159 @@ day_eight :: proc(input: string)
         fmt.println("Result:", encoded_characters - original_characters);
     }
 }
+
+
+LOCATIONS :: 8;
+
+
+evaluate_distance :: proc(shortest: ^int, indices: ^[LOCATIONS]int, distances: ^map[i64]int)
+{
+    location := indices[0];
+    total_distance := 0;
+
+    for i := 1; i < LOCATIONS; i = i + 1
+    {
+        next_location := indices[i];
+        key := hash_2D(location, next_location);
+        
+        total_distance = total_distance + distances[key];
+        location = next_location;
+    }
+    
+    if total_distance < shortest^
+    {
+        shortest^ = total_distance;
+    }
+}
+
+
+swap :: proc(x, y: int) -> (int, int)
+{
+    return y,x;
+}
+
+
+day_nine :: proc(input: string)
+{
+    distances := make(map[i64]int);
+    
+    left := 0;
+    right := 0;
+    from := 0;
+    to := 1;
+    for c in input
+    {
+        switch c
+        {
+            case ' ':
+                right = right + 1;
+                left = right;
+            case '\r':
+                distance,_ := strconv.parse_int(input[left:right]);
+                
+                // Bidirectional distance
+                distances[hash_2D(from,to)] = distance;
+                distances[hash_2D(to,from)] = distance;
+                
+                to = to + 1;
+                if to >= LOCATIONS
+                {
+                    from = from + 1;
+                    to = from + 1;
+                }
+
+                right = right + 1;
+            case:
+                right = right + 1;
+        }
+    }
+
+    // Permutation via Hash's Algorithm
+    n :: LOCATIONS;
+    a : [n]int;
+    for i := 0; i < n; i = i + 1 do a[i] = i;
+    
+    c : [n]int;
+    for i := 0; i < n; i = i + 1 do c[i] = 0;
+
+    i := 0;
+    shortest := 99999;
+
+    evaluate_distance(&shortest, &a, &distances);
+
+    for i < n
+    {
+        if c[i] < i
+        {
+            if i % 2 == 0
+            {
+                a[0], a[i] = swap(a[0], a[i]);
+            }
+            else
+            {
+                a[c[i]], a[i] = swap(a[c[i]], a[i]);
+            }
+
+            evaluate_distance(&shortest, &a, &distances);
+
+            c[i] = c[i] + 1;
+            i = 0;
+        }
+        else
+        {
+            c[i] = 0;
+            i = i + 1;
+        }
+    }
+    
+    fmt.println("Shortest distance:", shortest);
+}
+
+
+// Driver ---------------------------------------------------------//
+read_input_file :: proc(index: int) -> (string, bool) 
+{
+    file_name : string;
+    {
+        inputs_prefix  :: "..\\inputs\\";
+        inputs_postfix :: ".txt";
+        
+        builder := strings.make_builder();
+        strings.write_string(&builder, inputs_prefix);
+        strings.write_int(&builder, index);
+        strings.write_string(&builder, inputs_postfix);
+
+        file_name = strings.to_string(builder);
+    }
+    
+    data, success := os.read_entire_file(file_name);
+    if !success do return "", success;
+    return string(data), success;
+}
+
+
+read_user_input :: proc(data: []byte, length: int) -> bool 
+{
+    index := 0;
+    for index < length
+    {
+        _, input_err := os.read(os.stdin, data[index:index+1]);
+        if input_err != 0
+        {
+            return true;
+        }
+
+        // Line feed
+        if data[index] == 10 
+        {
+            return false;
+        }
+        index = index + 1;
+    }
+
+    return false;
+}
+
 
 main :: proc() 
 {
@@ -1043,6 +1194,9 @@ main :: proc()
                 day_two(input);
             case 3:
                 day_three(input);
+            // MD5 hash algorithm
+            // case 4: 
+            //     day_four(input)
             case 5:
                 day_five(input);
             case 6:
@@ -1051,8 +1205,8 @@ main :: proc()
                 day_seven(input);
             case 8:
                 day_eight(input);
-            // case 9:
-            //     day_nine(input);
+            case 9:
+                day_nine(input);
             // case 10:
             //     day_ten(input);
             // case 11:
@@ -1061,7 +1215,7 @@ main :: proc()
             //     day_twelve(input);
             // case 13:
             //     day_thirteen(input);
-            case 8..25:
+            case 10..25:
                 fmt.println("Day not implemented");
             case :
                 fmt.println("Please enter a valid number day");
@@ -1070,47 +1224,3 @@ main :: proc()
         delete(input);
     }
 }
-
-/*
-1 AND C -> B
-B RSHIFT D -> A
-NOT 2 -> C
-4 LSHIFT 2 -> D
-
-     4
-    /
-   D - LSHIFT
-  / \
- /   2
-A - RSHIFT
- \   1
-  \ /
-   B - AND
-    \   2
-     \ /
-      C - NOT
-
-Node A
-    name:  A
-    type:  RSHIFT
-    left:  B
-    right: D
-
-Node B
-    name:  A
-    type:  AND
-    left:  B
-    right: D
-
-Node C
-    name:  A
-    type:  RSHIFT
-    left:  B
-    right: D
-
-Node D
-    name:  A
-    type:  RSHIFT
-    left:  B
-    right: D
-    */
