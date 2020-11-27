@@ -1492,12 +1492,15 @@ Reindeer :: struct
     rest_time: int,
     index: int,
     resting: bool,
-    distance: int
+    distance: int,
+    points: int
 }
 
 
 day_fourteen :: proc(input: string)
 {
+    pt2 :: true;
+
     using parse;
 
     Seconds :: 2503;
@@ -1517,8 +1520,11 @@ day_fourteen :: proc(input: string)
         append(&reindeer, Reindeer{speed=speed.number, run_time=run.number, rest_time=rest.number});
     }
 
+
     for s := 0; s < Seconds; s += 1
     {
+        max_distance := 0;
+
         for _,i in reindeer
         {
             if !reindeer[i].resting
@@ -1540,16 +1546,40 @@ day_fourteen :: proc(input: string)
                     reindeer[i].resting = false;
                 }
             }
+            max_distance = max(max_distance, reindeer[i].distance);
+        }
+
+        if pt2 do for _,i in reindeer
+        {
+            if reindeer[i].distance == max_distance
+            {
+                reindeer[i].points += 1;
+            }
         }
     }
 
-    max_distance := 0;
-    for r in reindeer
-    {
-        max_distance = max(max_distance, r.distance);
-    }
 
-    fmt.println(max_distance);
+    if !pt2 
+    {
+        max_distance := 0;
+        for r in reindeer
+        {
+            max_distance = max(max_distance, r.distance);
+        }
+
+        fmt.println(max_distance);    
+    }
+    else
+    {
+        max_points := 0;
+        for r in reindeer
+        {
+            max_points = max(max_points, r.points);
+        }
+
+        fmt.println(max_points);
+    }
+    
 }
 
 
