@@ -5,47 +5,16 @@ import "core:os"
 import "core:strings"
 import "core:strconv"
 import "core:container"
+import "core:time"
+import "core:sys/windows"
+
+
+// Custom libraries
+import "permute"
+import "parse"
 
 
 // Common functions -----------------------------------------------//
-min_two :: proc(a: int, b: int) -> int
-{ 
-    m := a;
-    if b < m do m = b;
-    return m;
-}
-
-
-min_three :: proc(a: int, b: int, c: int) -> int
-{ 
-    m := a;
-    if b < m do m = b;
-    if c < m do m = c;
-    return m;
-}
-
-
-min :: proc
-{
-    min_two,
-    min_three
-};
-
-
-max_two :: proc(a: int, b: int) -> int
-{
-    m := a;
-    if b > m do m = b;
-    return m;
-}
-
-
-max :: proc
-{
-    max_two
-};
-
-
 sort_two :: proc(a: int, b: int) -> (int, int)
 {
     return min(a,b), max(a,b);
@@ -60,7 +29,7 @@ sort :: proc
 
 hash_2D :: proc(x: int, y: int) -> i64
 {
-    mask_32 := 1 << 32 - 1;
+    mask_32 :: 1 << 32 - 1;
 
     x_32 := i64(x & mask_32);
     y_32 := i64(y & mask_32);
@@ -1076,7 +1045,7 @@ day_nine :: proc(input: string)
         }
     }
 
-    // Permutation via Hash's Algorithm
+    // Permutation via Heap's Algorithm
     n :: LOCATIONS;
     a : [n]int;
     for i := 0; i < n; i = i + 1 do a[i] = i;
@@ -1251,6 +1220,9 @@ day_twelve_pt2 :: proc(input: string)
 {
     using container;
 
+    start_cycle := time.read_cycle_counter();
+    start_time := time.now();
+
     debug :: false;
 
     total := 0;
@@ -1383,6 +1355,11 @@ day_twelve_pt2 :: proc(input: string)
         lookback[0] = c;
     }
 
+    end_time := time.now();
+    end_cycle := time.read_cycle_counter();
+
+    fmt.println(time.duration_nanoseconds(time.diff(start_time, end_time)), "ns");
+    fmt.println(end_cycle - start_cycle, "clock cycles");
     fmt.println(array_get(total_stack, 0));
 }
 
@@ -1425,6 +1402,70 @@ day_twelve :: proc(input: string)
 }
 
 
+day_thirteen :: proc(input: string)
+{
+    using parse;
+    using permute;
+
+    word_info := make_parse_info(input);
+    word_info.search = {TokenType.Word};
+
+    number_info := make_parse_info(input);
+    number_info.search = {TokenType.Number};
+
+    adjacency_bonus := make(map[i64]int);
+
+    i := 0;
+    j := 1;
+    
+    Seats :: 8;
+
+    for i in 0..<Seats
+    {
+        for j in 0..<Seats
+        {
+            if i == j do continue;
+
+            gain: bool;
+            for 
+            {
+                word,_ := parse_next(&word_info);
+                if word.data == "gain" || word.data == "lose"
+                {
+                    gain = word.data == "gain";
+                    break;
+                }
+            }
+
+            token,_ := parse_next(&number_info);
+            adjacency_bonus[hash_2D(i,j)] = token.number if gain else -token.number;
+        }
+    }
+
+    lookup: [Seats]int;
+    for i in 0..<Seats do lookup[i] = i;
+
+    permutation := make_permutation(Seats);
+    max_happiness := -999;
+
+    for permute_next(&permutation, &lookup)
+    {
+        total_happiness := 0;
+        last_seat := Seats-1;
+        for i in 0..<Seats
+        {
+            total_happiness += adjacency_bonus[hash_2D(lookup[last_seat], lookup[i])];
+            total_happiness += adjacency_bonus[hash_2D(lookup[i], lookup[last_seat])];
+            last_seat = i;
+        }
+        
+        max_happiness = max(max_happiness, total_happiness);
+    }
+
+    fmt.println(max_happiness);
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -1435,6 +1476,10 @@ read_input_file :: proc(index: int) -> (string, bool)
         
         builder := strings.make_builder();
         strings.write_string(&builder, inputs_prefix);
+        
+        // Prepend 0 for days 1-9
+        if index < 10 do strings.write_int(&builder, 0);
+        
         strings.write_int(&builder, index);
         strings.write_string(&builder, inputs_postfix);
 
@@ -1534,8 +1579,8 @@ main :: proc()
                 day_eleven(input);
             case 12:
                 day_twelve(input);
-            // case 13:
-            //     day_thirteen(input);
+            case 13:
+                 day_thirteen(input);
             case 10..25:
                 fmt.println("Day not implemented");
             case :

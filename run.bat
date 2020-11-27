@@ -1,4 +1,4 @@
 @ECHO OFF
-cd ./build
-odin run ../src/main.odin
+cd ./src
+odin run main.odin -out=../build/main
 cd ..
