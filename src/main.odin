@@ -1418,11 +1418,21 @@ day_thirteen :: proc(input: string)
     i := 0;
     j := 1;
     
-    Seats :: 8;
-
-    for i in 0..<Seats
+    pt2 :: true;
+    when pt2 
     {
-        for j in 0..<Seats
+        Seats :: 9;    
+    }
+    else
+    {
+        Seats :: 8;
+    }
+
+    FileSeats :: 8;
+
+    for i in 0..<FileSeats
+    {
+        for j in 0..<FileSeats
         {
             if i == j do continue;
 
@@ -1439,6 +1449,15 @@ day_thirteen :: proc(input: string)
 
             token,_ := parse_next(&number_info);
             adjacency_bonus[hash_2D(i,j)] = token.number if gain else -token.number;
+        }
+    }
+
+    if pt2 
+    {
+        for i in 0..<Seats-1
+        {
+            adjacency_bonus[hash_2D(i,Seats-1)] = 0;
+            adjacency_bonus[hash_2D(Seats-1,i)] = 0;
         }
     }
 
