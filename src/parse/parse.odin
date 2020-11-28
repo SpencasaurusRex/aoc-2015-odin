@@ -9,7 +9,9 @@ TokenType :: enum
     Word,
     Space,
     EndOfLine,
-    EndOfFile
+    EndOfFile,
+    Colon,
+    Comma
 }
 
 
@@ -21,7 +23,7 @@ ParseInfo :: struct
     index: int,
     input: string,
     search: SearchData,
-    done: bool
+    done: bool,
 }
 
 
@@ -91,6 +93,14 @@ parse_next_parameter :: proc(info: ^ParseInfo, search_data: SearchData) -> (Toke
                 token := make_token(input[index:index],.Space);
                 index += 1;
                 if .Space in search_data do return token, true;
+            case ':':
+                token := make_token(input[index:index],.Colon);
+                index += 1;
+                if .Colon in search_data do return token, true;
+            case ',':
+                token := make_token(input[index:index],.Comma);
+                index += 1;
+                if .Comma in search_data do return token, true;
             case '\r':
                 index += 1;
             case '\n':
@@ -121,7 +131,7 @@ read_word :: proc(info: ^ParseInfo) -> Token
         if index >= len(input) do return make_token(input[left:index], .Word);
         switch input[index]
         {
-            case ' ','\r','\n':
+            case ' ','\r','\n', ':', ',':
                 return make_token(input[left:index], .Word);
             case:
                 continue;

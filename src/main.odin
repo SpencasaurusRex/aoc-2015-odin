@@ -1638,8 +1638,8 @@ day_fifteen :: proc(input: string)
                     p = a * ingredients[0].props + b * ingredients[1].props
                       + c * ingredients[2].props + d * ingredients[3].props;
                     
-                    m := max(p[0],0) * max(p[1],0) * max(p[2],0) * max(p[3],0);
-                    max_score = max(m, max_score);
+                    s := max(p[0],0) * max(p[1],0) * max(p[2],0) * max(p[3],0);
+                    max_score = max(s, max_score);
                 }
             }
         }
@@ -1649,10 +1649,57 @@ day_fifteen :: proc(input: string)
 }
 
 
+day_sixteen :: proc(input: string)
+{
+    using parse;
+
+    aunt_info : [500]map[string]int;
+
+    parse_info := make_parse_info(input);
+    parse_info.search = {TokenType.Word, TokenType.Number};
+
+    check: map[string]int;
+    check["children"] = 3;
+    check["cats"] = 7;
+    check["sayomeds"] = 2;
+    check["pomeranians"] = 3;
+    check["akitas"] = 0;
+    check["vizslas"] = 0;
+    check["goldfish"] = 5;
+    check["trees"] = 3;
+    check["cars"] = 2;
+    check["perfumes"] = 1;
+
+    sue_check: for i in 0..<500 
+    {
+        // Read sue #
+        parse_next(&parse_info);
+        parse_next(&parse_info);
+
+        for j in 0..<3
+        {
+            name_token,_ := parse_next(&parse_info);
+            number_token,_ := parse_next(&parse_info);
+            aunt_info[i][name_token.data] = number_token.number;
+        }
+
+        for k,v in check
+        {
+            if k in aunt_info[i] && v != aunt_info[i][k]
+            {
+                continue sue_check;
+            }
+        }
+
+        fmt.println("Sue #", i+1, "is a match");
+    }
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
-    file_name : string;
+    file_name: string;
     {
         inputs_prefix  :: "..\\inputs\\";
         inputs_postfix :: ".txt";
@@ -1768,7 +1815,9 @@ main :: proc()
                 day_fourteen(input);
             case 15:
                 day_fifteen(input);
-            case 16..25:
+            case 16:
+                day_sixteen(input);
+            case 17..25:
                 fmt.println("Day not implemented");
             case:
                 fmt.println("Please enter a valid number day");
