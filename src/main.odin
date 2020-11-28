@@ -1592,6 +1592,8 @@ Ingredient :: struct
 
 day_fifteen :: proc(input: string)
 {
+    pt2 :: true;
+
     using parse;
 
     parse_info := make_parse_info(input);
@@ -1627,6 +1629,12 @@ day_fifteen :: proc(input: string)
                 for d in 0..<66
                 {
                     if a + b + c +d != 100 do continue;
+                    if pt2 && a * ingredients[0].cal + b * ingredients[1].cal 
+                        + c * ingredients[2].cal + d * ingredients[3].cal != 500
+                    {
+                        continue;
+                    }
+
                     p = a * ingredients[0].props + b * ingredients[1].props
                       + c * ingredients[2].props + d * ingredients[3].props;
                     
