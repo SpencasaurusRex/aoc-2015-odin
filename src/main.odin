@@ -1651,6 +1651,8 @@ day_fifteen :: proc(input: string)
 
 day_sixteen :: proc(input: string)
 {
+    pt2 :: true;
+
     using parse;
 
     aunt_info : [500]map[string]int;
@@ -1661,7 +1663,7 @@ day_sixteen :: proc(input: string)
     check: map[string]int;
     check["children"] = 3;
     check["cats"] = 7;
-    check["sayomeds"] = 2;
+    check["samoyeds"] = 2;
     check["pomeranians"] = 3;
     check["akitas"] = 0;
     check["vizslas"] = 0;
@@ -1669,6 +1671,7 @@ day_sixteen :: proc(input: string)
     check["trees"] = 3;
     check["cars"] = 2;
     check["perfumes"] = 1;
+
 
     sue_check: for i in 0..<500 
     {
@@ -1685,7 +1688,23 @@ day_sixteen :: proc(input: string)
 
         for k,v in check
         {
-            if k in aunt_info[i] && v != aunt_info[i][k]
+            if !(k in aunt_info[i]) do continue;
+            if pt2
+            {
+                if k == "cats" || k == "trees"
+                {
+                    if aunt_info[i][k] <= v do continue sue_check;
+                }
+                else if k == "pomeranians" || k == "goldfish"
+                {
+                    if aunt_info[i][k] >= v do continue sue_check;
+                }
+                else if v != aunt_info[i][k]
+                {
+                    continue sue_check;
+                }
+            }
+            else if v != aunt_info[i][k]
             {
                 continue sue_check;
             }
