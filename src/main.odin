@@ -1579,7 +1579,65 @@ day_fourteen :: proc(input: string)
 
         fmt.println(max_points);
     }
-    
+}
+
+
+Props :: [4]int;
+
+Ingredient :: struct
+{
+    props: Props,
+    cal: int
+}
+
+day_fifteen :: proc(input: string)
+{
+    using parse;
+
+    parse_info := make_parse_info(input);
+    parse_info.search = {TokenType.Number};
+
+    NumIngredients :: 4;
+    ingredients: [NumIngredients]Ingredient;
+
+    for i in 0..<NumIngredients
+    {
+        ingredients[i] = Ingredient{};
+        for j in 0..<4
+        {
+            token,_ := parse_next(&parse_info);
+            ingredients[i].props[j] = token.number;
+        }
+        token,_ := parse_next(&parse_info);
+        ingredients[i].cal = token.number;
+    }
+
+    //for i in 0..<4 do fmt.println(ingredients[i]);
+
+    p: Props;
+    max_score := 0;
+
+    // Max ingredients for each type determined with algebra
+    for a in 0..<40
+    {
+        for b in 0..<50
+        {
+            for c in 0..<75
+            {
+                for d in 0..<66
+                {
+                    if a + b + c +d != 100 do continue;
+                    p = a * ingredients[0].props + b * ingredients[1].props
+                      + c * ingredients[2].props + d * ingredients[3].props;
+                    
+                    m := max(p[0],0) * max(p[1],0) * max(p[2],0) * max(p[3],0);
+                    max_score = max(m, max_score);
+                }
+            }
+        }
+    }
+
+    fmt.println(max_score);
 }
 
 
@@ -1700,9 +1758,11 @@ main :: proc()
                 day_thirteen(input);
             case 14:
                 day_fourteen(input);
-            case 15..25:
+            case 15:
+                day_fifteen(input);
+            case 16..25:
                 fmt.println("Day not implemented");
-            case :
+            case:
                 fmt.println("Please enter a valid number day");
         }
 
