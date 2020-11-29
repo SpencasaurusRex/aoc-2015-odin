@@ -1781,9 +1781,10 @@ day_seventeen :: proc(input: string)
 
 day_eighteen :: proc(input: string)
 {
-    pt2 :: false;
+    pt2 :: true;
     length :: 100;
     area :: length * length;
+    steps :: 100;
 
     current_state: [area]bool;
     next_state: [area]bool;
@@ -1810,7 +1811,15 @@ day_eighteen :: proc(input: string)
         return 1 if array[i] else 0;
     }
 
-    for step in 0..<100
+    if pt2 
+    {
+        current_state[0] = true;
+        current_state[length-1] = true;
+        current_state[(length-1)*length] = true;
+        current_state[length*length-1] = true;
+    }
+
+    for step in 0..<steps
     {
         for y in 0..<length
         {
@@ -1842,8 +1851,15 @@ day_eighteen :: proc(input: string)
         {
             current_state[j] = next_state[j];
         }
+
+        if pt2 
+        {
+            current_state[0] = true;
+            current_state[length-1] = true;
+            current_state[(length-1)*length] = true;
+            current_state[length*length-1] = true;
+        }
     }
-    
 
     lights_on := 0;
     for i in 0..<area
