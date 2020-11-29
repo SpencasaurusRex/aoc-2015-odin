@@ -11,6 +11,7 @@ import "core:sys/windows"
 
 // Custom libraries
 import "permute"
+//import "combine"
 import "parse"
 
 
@@ -1715,6 +1716,51 @@ day_sixteen :: proc(input: string)
 }
 
 
+day_seventeen :: proc(input: string)
+{
+    pt2 :: false;
+
+    using parse;
+    using permute;
+
+    info := make_parse_info(input);
+    info.search = {TokenType.Number};
+
+    containers := make([dynamic]int);
+    defer delete(containers);
+
+    for 
+    {
+        token,ok := parse_next(&info);
+        if !ok do break;
+        append(&containers, token.number);
+    }
+
+    // Get all combinations of containers
+    num_containers := uint(len(containers));
+    num_combos := 1 << num_containers;
+    valid_combos := 0;
+
+    for i in 0..<num_combos
+    {
+        mask := 1;
+        total := 0;
+        for j in 0..<num_containers
+        {
+            if i & mask > 0
+            {
+                total += containers[j];
+            }
+            mask *= 2;
+        }
+
+        if total == 150 do valid_combos += 1;
+    }
+
+    fmt.println(valid_combos, "valid combinations");
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -1836,7 +1882,9 @@ main :: proc()
                 day_fifteen(input);
             case 16:
                 day_sixteen(input);
-            case 17..25:
+            case 17:
+                day_seventeen(input);
+            case 18..25:
                 fmt.println("Day not implemented");
             case:
                 fmt.println("Please enter a valid number day");
