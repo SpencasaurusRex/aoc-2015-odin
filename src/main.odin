@@ -1779,6 +1779,82 @@ day_seventeen :: proc(input: string)
 }
 
 
+day_eighteen :: proc(input: string)
+{
+    pt2 :: false;
+    length :: 100;
+    area :: length * length;
+
+    current_state: [area]bool;
+    next_state: [area]bool;
+
+    i := 0;
+    for c in input
+    {
+        switch c 
+        {
+            case '\r': fallthrough;
+            case '\n': continue;
+            case '#':
+                current_state[i] = true;
+            case '.':
+                current_state[i] = false;
+        }
+        i += 1;
+    }
+
+    get_state :: proc(array: [area]bool, x: int, y: int) -> int
+    {
+        i := x + y * length;
+        if x < 0 || x >= length || y < 0 || y >= length do return 0;
+        return 1 if array[i] else 0;
+    }
+
+    for step in 0..<100
+    {
+        for y in 0..<length
+        {
+            for x in 0..<length
+            {
+                neighbors := 0;
+                neighbors += get_state(current_state, x-1, y-1);
+                neighbors += get_state(current_state, x, y-1);
+                neighbors += get_state(current_state, x+1, y-1);
+
+                neighbors += get_state(current_state, x-1, y);
+                neighbors += get_state(current_state, x+1, y);
+                
+                neighbors += get_state(current_state, x-1, y+1);
+                neighbors += get_state(current_state, x, y+1);
+                neighbors += get_state(current_state, x+1, y+1);
+
+
+                self := get_state(current_state, x, y);
+                index := x + y * length;
+                
+                next_state[index] = 
+                    (self == 0 && neighbors == 3) || 
+                    (self == 1 && (neighbors == 2 || neighbors == 3));
+            }
+        }
+        
+        for j in 0..<area
+        {
+            current_state[j] = next_state[j];
+        }
+    }
+    
+
+    lights_on := 0;
+    for i in 0..<area
+    {
+        if current_state[i] do lights_on += 1;
+    }
+
+    fmt.println(lights_on, "lights on");
+}
+
+
 // Driver ---------------------------------------------------------//
 read_input_file :: proc(index: int) -> (string, bool) 
 {
@@ -1902,7 +1978,9 @@ main :: proc()
                 day_sixteen(input);
             case 17:
                 day_seventeen(input);
-            case 18..25:
+            case 18:
+                day_eighteen(input);
+            case 19..25:
                 fmt.println("Day not implemented");
             case:
                 fmt.println("Please enter a valid number day");
